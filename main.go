@@ -35,22 +35,26 @@ func main() {
 		}
 	}
 	escapedQuery := url.QueryEscape(wordSB.String())
+	channel := make(chan interface{})
+	go PrintProgress(channel)
 	responseString, err := requestSearchingWord(escapedQuery)
+	channel <- struct{}{}
 	if err != nil {
-		fmt.Println("服务器返回错误 :", err.Error())
+		fmt.Printf("\r服务器返回错误: %s", err.Error())
+		return
 	}
 	var responseStruct CommonResult
 	err = json.Unmarshal([]byte(responseString), &responseStruct)
 	if err != nil {
-		fmt.Println("JSON解析错误:", err)
+		fmt.Printf("\rJSON解析错误: %s", err.Error())
 		return
 	}
 	if responseStruct.ErrorCode != 0 {
-		fmt.Println("error message :", responseStruct.ErrorMessage)
+		fmt.Printf("\rerror message: %s", responseStruct.ErrorMessage)
 		return
 	}
 	searchResultData := responseStruct.Data.(map[string]interface{})
-	fmt.Println(strings.ReplaceAll(searchResultData["Translation"].(string), "\\n", "\n"))
+	fmt.Printf("\r%s\n", strings.ReplaceAll(searchResultData["Translation"].(string), "\\n", "\n"))
 }
 
 func requestSearchingWord(word string) (string, error) {
