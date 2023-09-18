@@ -40,17 +40,17 @@ func main() {
 	responseString, err := requestSearchingWord(escapedQuery)
 	channel <- struct{}{}
 	if err != nil {
-		fmt.Printf("\r服务器返回错误: %s", err.Error())
+		fmt.Printf("\r服务器返回错误: %s\n", err.Error())
 		return
 	}
 	var responseStruct CommonResult
 	err = json.Unmarshal([]byte(responseString), &responseStruct)
 	if err != nil {
-		fmt.Printf("\rJSON解析错误: %s", err.Error())
+		fmt.Printf("\rJSON解析错误: %s\n", err.Error())
 		return
 	}
 	if responseStruct.ErrorCode != 0 {
-		fmt.Printf("\rerror message: %s", responseStruct.ErrorMessage)
+		fmt.Printf("\rerror message: %s\n", responseStruct.ErrorMessage)
 		return
 	}
 	searchResultData := responseStruct.Data.(map[string]interface{})
