@@ -37,11 +37,14 @@ func main() {
 	escapedQuery := url.QueryEscape(wordSB.String())
 	channel := make(chan interface{})
 	go PrintProgress(channel)
-	responseString, err := requestSearchingWord(escapedQuery)
+	responseString, err, responseStatusCode := requestSearchingWord(escapedQuery)
 	channel <- struct{}{}
 	if err != nil {
 		fmt.Printf("\r服务器返回错误: %s\n", err.Error())
 		return
+	}
+	if responseStatusCode != 200 {
+		fmt.Printf("\r服务器返回状态码: %d\n", responseStatusCode)
 	}
 	var responseStruct CommonResult
 	err = json.Unmarshal([]byte(responseString), &responseStruct)
@@ -57,17 +60,17 @@ func main() {
 	fmt.Printf("\r%s\n", strings.ReplaceAll(searchResultData["Translation"].(string), "\\n", "\n"))
 }
 
-func requestSearchingWord(word string) (string, error) {
+func requestSearchingWord(word string) (string, error, int) {
 	response, err := http.Get(ServerUrl + word)
 	if err != nil {
 		fmt.Println("HTTP请求错误:", err)
-		return "", err
+		return "", err, 0
 	}
 	defer response.Body.Close()
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		fmt.Println("读取响应错误:", err)
-		return "", err
+		return "", err, 0
 	}
-	return string(body), nil
+	return string(body), nil, response.StatusCode
 }
