@@ -21,7 +21,7 @@ type SearchResult struct {
 	Translation string `json:"Translation"`
 }
 
-//const ServerUrl = "http://localhost:4000/search/"
+// const ServerUrl = "http://localhost:4000/search/"
 const ServerUrl = "https://www.wordcounter007.com/search/"
 
 func main() {
@@ -45,6 +45,8 @@ func main() {
 	}
 	if responseStatusCode != 200 {
 		fmt.Printf("\r服务器返回状态码: %d\n", responseStatusCode)
+		fmt.Printf("\r服务器返回字符串: \n%s\n", responseString)
+		return
 	}
 	var responseStruct CommonResult
 	err = json.Unmarshal([]byte(responseString), &responseStruct)
